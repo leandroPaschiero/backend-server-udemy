@@ -33,30 +33,17 @@ app.get('/coleccion/:tabla/:busqueda',(req,res) => {
     var tabla = req.params.tabla;
     var regex = new RegExp(busqueda, 'i');
 
+    var promesa;
+
     switch (tabla.toLocaleLowerCase()) {
         case 'usuarios':
-            buscarUsuarios(busqueda, regex).then(response => {
-                res.status(200).json({
-                    ok:true,
-                    usuarios: response
-                });
-            })
+            promesa = buscarUsuarios(busqueda, regex);
             break;
         case 'medicos':
-            buscarMedicos(busqueda, regex).then(response => {
-                res.status(200).json({
-                    ok:true,
-                    medicos: response
-                });
-            })
+            promesa = buscarMedicos(busqueda, regex);
             break;
         case 'hospitales':
-            buscarHospitales(busqueda, regex).then(response => {
-                res.status(200).json({
-                    ok:true,
-                    hospitales: response
-                });
-            })
+            promesa = buscarHospitales(busqueda, regex);
             break;
         default:
             return res.status(404).json({
@@ -64,6 +51,13 @@ app.get('/coleccion/:tabla/:busqueda',(req,res) => {
                 hospitales: 'No existe la tabla a la que intenta acceder'
             });
     }
+
+    promesa.then(response => {
+        res.status(200).json({
+            ok:true,
+            [tabla]: response
+        });
+    })
 })
 
 
