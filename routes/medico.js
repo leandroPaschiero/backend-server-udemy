@@ -9,7 +9,16 @@ var app = express();
 //Peticion GET general
 //========================================
 app.get('/', (req, res) => {
-    Medico.find({},(err,medicos) => {
+
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    Medico.find({})
+    .skip(desde)
+    .limit(5)
+    .populate('usuario', 'nombre email')
+    .populate('hospital')
+    .exec((err,medicos) => {
         if(err){
             res.status(500).json({
                 ok: false,
@@ -18,10 +27,13 @@ app.get('/', (req, res) => {
             });
         }
 
-        res.status(200).json({
-            ok: true,
-            medicos: medicos
-        });
+        Medico.count({},(err,conteo) => {
+            res.status(200).json({
+                ok: true,
+                total: conteo,
+                medicos: medicos
+            });
+        })
     });
 });
 
