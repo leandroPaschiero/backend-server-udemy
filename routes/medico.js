@@ -9,13 +9,7 @@ var app = express();
 //Peticion GET general
 //========================================
 app.get('/', (req, res) => {
-
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-
     Medico.find({})
-    .skip(desde)
-    .limit(5)
     .populate('usuario', 'nombre email')
     .populate('hospital')
     .exec((err,medicos) => {
@@ -36,6 +30,39 @@ app.get('/', (req, res) => {
         })
     });
 });
+
+//========================================
+//Obtener por id
+//========================================
+app.get('/:id', (req,res) => {
+    var id = req.params.id;
+    var body = req.body;
+
+    Medico.findById(id)
+        .populate('usuario','nombre email img')
+        .populate('hospital')
+        .exec((err,medico) => {
+            if(err){
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al recuperar el medico',
+                    errors: err
+                });
+            }
+    
+            if(!medico){
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No se encontro ningun medico con el id: ' + id
+                })
+            }
+
+            res.status(200).json({
+                ok: true,
+                medico:medico
+            })
+        })
+})
 
 
 
